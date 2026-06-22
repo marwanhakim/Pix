@@ -1,0 +1,171 @@
+{
+  "entities": {
+    "User": {
+      "title": "Staff User",
+      "description": "System user profiles representing employees and owners with access control roles",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["owner", "cashier", "captain"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Device": {
+      "title": "PlayStation Device",
+      "description": "Lounge PlayStation gaming consoles and screens",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "section": { "type": "string", "enum": ["standard", "vip", "billiards"] },
+        "status": { "type": "string", "enum": ["available", "busy"] },
+        "currentSessionId": { "type": "string" },
+        "hourlyRateSingle": { "type": "number" },
+        "hourlyRateMulti": { "type": "number" }
+      },
+      "required": ["id", "name", "type", "section", "status", "hourlyRateSingle", "hourlyRateMulti"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Registered customers database containing contact and subscription information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "notes": { "type": "string" },
+        "subscriptionId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "phone"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "Monthly and recurring subscription packages for frequent users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "planName": { "type": "string" },
+        "type": { "type": "string", "enum": ["hours", "unlimited"] },
+        "totalHours": { "type": "number" },
+        "remainingHours": { "type": "number" },
+        "pricePaid": { "type": "number" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "expired"] }
+      },
+      "required": ["id", "customerId", "customerName", "planName", "type", "remainingHours", "pricePaid", "startDate", "endDate", "status"]
+    },
+    "MenuItem": {
+      "title": "Menu Item",
+      "description": "Items in the café menu (drinks, snacks, etc.)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string", "enum": ["drinks", "snacks", "meals"] },
+        "stock": { "type": "number" }
+      },
+      "required": ["id", "name", "price", "category"]
+    },
+    "Session": {
+      "title": "Gaming Session",
+      "description": "Active or historical gaming session details of a PlayStation device",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "deviceName": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "sessionType": { "type": "string", "enum": ["open", "fixed"] },
+        "playType": { "type": "string", "enum": ["single", "multi"] },
+        "fixedDuration": { "type": "number" },
+        "hourlyRate": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "completed", "cancelled"] },
+        "totalPlayAmount": { "type": "number" },
+        "totalOrdersAmount": { "type": "number" },
+        "discountAmount": { "type": "number" },
+        "finalAmount": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["cash", "card", "subscription"] },
+        "endedBy": { "type": "string" },
+        "orders": { "type": "array" }
+      },
+      "required": ["id", "deviceId", "deviceName", "customerId", "customerName", "startTime", "sessionType", "playType", "hourlyRate", "status", "orders"]
+    },
+    "Transaction": {
+      "title": "Financial Transaction",
+      "description": "Financial ledger record for reporting",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "type": { "type": "string", "enum": ["session_payment", "subscription_payment", "expense"] },
+        "amount": { "type": "number" },
+        "description": { "type": "string" },
+        "paymentMethod": { "type": "string", "enum": ["cash", "card"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "staffName": { "type": "string" }
+      },
+      "required": ["id", "type", "amount", "description", "paymentMethod", "timestamp", "staffName"]
+    },
+    "ActivityLog": {
+      "title": "System Activity Log",
+      "description": "Exclusively audited list of system actions and events for the owner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["device", "customer", "subscription", "menu", "session", "transaction", "system", "staff"] },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "staffName": { "type": "string" },
+        "staffRole": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "action", "details", "staffName", "staffRole", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Lounge staff definitions"
+    },
+    "devices": {
+      "schema": "Device",
+      "description": "List of active gaming systems and pricing metrics"
+    },
+    "customers": {
+      "schema": "Customer",
+      "description": "Customers contact lists"
+    },
+    "subscriptions": {
+      "schema": "Subscription",
+      "description": "Monthly and hourly pricing bundles for frequent gamers"
+    },
+    "menuItems": {
+      "schema": "MenuItem",
+      "description": "Lounge Cafe beverage and snack stocks"
+    },
+    "sessions": {
+      "schema": "Session",
+      "description": "Gaming session records"
+    },
+    "transactions": {
+      "schema": "Transaction",
+      "description": "Complete journal of revenue and payments"
+    },
+    "activityLogs": {
+      "schema": "ActivityLog",
+      "description": "Audit log for tracking critical administration events logged only for the owner"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Custom fade animations */
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print thermal receipt & report styling POS printers and standard A4 printers */
+@media print {
+  /* Hide the main application root and scripts during printing */
+  #root, script {
+    display: none !important;
+  }
+
+  /* Reset body styles for professional pure black-and-white print layout */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    font-family: Arial, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* The actual print container */
+  .portal-print-container {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Maximize standard margins */
+  @page {
+    margin: 10mm 15mm 10mm 15mm;
+  }
+
+  /* Specific structure for 80mm thermal receipts */
+  .portal-print-container.thermal-receipt {
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 4mm !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    border: none !important;
+  }
+
+  /* Overrides for page margins during thermal POS receipt printing to prevent blank pages */
+  .portal-print-container.thermal-receipt-page {
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  body.thermal-receipt-body {
+    width: 80mm !important;
+  }
+
+  @page {
+    /* If printing a receipt, let's remove page-header / page-footer margin spacing */
+    size: auto;
+    margin: 0mm;
+  }
+}
+
+/* On standard screens (not printing), hide the print portal completely */
+@media screen {
+  .portal-print-container {
+    display: none !important;
+  }
+}

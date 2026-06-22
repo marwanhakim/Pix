@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global safety catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Core Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Check if the current user is verified or logged in with Google/Email
+    function isEmailVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'password');
+    }
+
+    // Role lookups using document state
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isOwner() {
+      return isSignedIn() && (
+        request.auth.token.email == 'mero7.rap7@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'owner')
+      );
+    }
+
+    function isCashier() {
+      return isSignedIn() && (
+        isOwner() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'cashier')
+      );
+    }
+
+    function isCaptain() {
+      return isSignedIn() && (
+        isCashier() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'captain')
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Collection-Specific Rules ---
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (request.auth.uid == userId || isOwner());
+      allow update: if isSignedIn() && (isOwner() || (request.auth.uid == userId && incoming().role == existing().role));
+      allow delete: if isOwner();
+    }
+
+    // 2. Devices Collection
+    match /devices/{deviceId} {
+      allow read: if isSignedIn();
+      allow write: if isCaptain();
+    }
+
+    // 3. Customers Collection
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create, update: if isCashier();
+      allow delete: if isOwner();
+    }
+
+    // 4. Subscriptions Collection
+    match /subscriptions/{subscriptionId} {
+      allow read: if isSignedIn();
+      allow create, update: if isCashier();
+      allow delete: if isOwner();
+    }
+
+    // 5. Menu Items Collection
+    match /menuItems/{itemId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isOwner();
+      allow update: if isCaptain();
+    }
+
+    // 6. Sessions Collection
+    match /sessions/{sessionId} {
+      allow read: if isSignedIn();
+      allow create: if isCaptain();
+      allow update: if isCaptain();
+      allow delete: if isOwner();
+    }
+
+    // 7. Transactions Collection
+    match /transactions/{transactionId} {
+      allow read: if isCashier();
+      allow create: if isCashier();
+      allow update, delete: if isOwner();
+    }
+
+    // 8. Activity Logs Collection
+    match /activityLogs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isOwner();
+    }
+  }
+}
